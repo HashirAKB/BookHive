@@ -15,15 +15,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+//https://www.baeldung.com/security-context-basics
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 
-/**
- * Created By Zhu Lin on 3/11/2018.
- */
+/*This @CrossOrigin annotation enables cross-origin resource sharing only for this specific method. By default, its allows all origins, all headers, and the HTTP methods specified in the @RequestMapping annotation.
+@RestController is a Spring annotation that is used to build REST API in a declarative way. RestController annotation is applied to a class to mark it as a request handler, and Spring will do the building and provide the RESTful web service at runtime.
+https://codeburst.io/rest-controller-building-rest-api-638d3ff4fa71
+*/
 @CrossOrigin
 @RestController
+
+/*
+ * https://www.baeldung.com/spring-requestmapping
+ */
 @RequestMapping("/cart")
 public class CartController {
     @Autowired
@@ -37,6 +43,7 @@ public class CartController {
     @Autowired
     ProductInOrderRepository productInOrderRepository;
 
+	/* Method implementation for adding items into existing cart */
     @PostMapping("")
     public ResponseEntity<Cart> mergeCart(@RequestBody Collection<ProductInOrder> productInOrders, Principal principal) {
         User user = userService.findOne(principal.getName());

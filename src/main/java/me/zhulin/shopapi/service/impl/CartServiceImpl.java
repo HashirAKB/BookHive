@@ -1,3 +1,4 @@
+/*Declaring cart services*/
 package me.zhulin.shopapi.service.impl;
 
 
@@ -20,9 +21,13 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
-/**
- * Created By Zhu Lin on 3/11/2018.
- */
+/*Spring @Service annotation is a specialization of @Component annotation. Spring Service annotation can be applied only to classes. It is used to mark the class as a service provider.*/
+
+/*https://www.baeldung.com/spring-depends-on
+ * We should use this annotation for specifying bean dependencies. Spring guarantees that the defined beans will be initialized before attempting an initialization of the current bean.
+
+we have a UserServiceImpl which depends on passwordEncoder. In this case, passwordEncoder should be initialized before the UserServiceImpl.
+*/
 @Service
 public class CartServiceImpl implements CartService {
     @Autowired
@@ -47,21 +52,40 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public void mergeLocalCart(Collection<ProductInOrder> productInOrders, User user) {
+    	
+		/* retrieveing cart details(as obj) from db. */
         Cart finalCart = user.getCart();
+        
         productInOrders.forEach(productInOrder -> {
+			/*
+			 * Adding all the products into a set of name set from the FinalCart variable
+			 * using getProducts Fn.
+			 */
             Set<ProductInOrder> set = finalCart.getProducts();
+            
+			/*
+			 * https://www.baeldung.com/java-optional
+			 * Looking whether the product(book) is already in the cart.
+			 */            
             Optional<ProductInOrder> old = set.stream().filter(e -> e.getProductId().equals(productInOrder.getProductId())).findFirst();
             ProductInOrder prod;
+            
+            /*If it is present increasing the number of item when adding it again into the cart*/
             if (old.isPresent()) {
                 prod = old.get();
                 prod.setCount(productInOrder.getCount() + prod.getCount());
             } else {
+            	
+				/* If the item is not already in the cart, Adding the item into the cart */
                 prod = productInOrder;
                 prod.setCart(finalCart);
                 finalCart.getProducts().add(prod);
             }
+			/* Adding the items in the cart to the ordered products table. */
             productInOrderRepository.save(prod);
         });
+        
+		/* Adding the cart into database table cart */
         cartRepository.save(finalCart);
 
     }
